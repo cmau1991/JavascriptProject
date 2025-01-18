@@ -1,0 +1,3907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Coeliac-Safe Travel Translator</title>
+ <style>
+@import url(https://fonts.googleapis.com/css?family=Barlow:wght@100;500;700;900&display=swap);
+@import url("https://fonts.googleapis.com/css2?family=Unbounded:wght@500;900&display=swap");
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      justify-content: center;
+      background: linear-gradient(to right, #a2eba4, #58a364);
+    }
+    #translator {
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 10px;
+      margin-right: 10px;
+      border-radius: 8px;
+      transition: transform 0.3s ease-in-out;
+    }
+    #translated-text {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #333;
+    }
+    h1 {
+      font-family: "Unbounded";
+      color: white;
+      border-bottom: 5px solid rgb(255, 51, 133);
+      font-size: clamp(0.75rem, 3vw + 1rem, 2.5rem);
+      margin-bottom: 10px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-width: 700px;
+      font-size: 1em;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .print-button {
+      margin-top: 10px;
+      display: block;
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .print-button:hover {
+      background-color: #0056b3;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+        box-sizing: border-box;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+        width: 210mm;
+        height: 297mm;
+        transform: scale(0.9);
+        align-items: center;
+        justify-content: center;
+        page-break-inside: avoid;
+      }
+      .print-button {
+        display: none;
+      }
+    }
+
+    @font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Semibold.ttf) format(truetype);
+  font-weight: bold;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Light.ttf) format(truetype);
+  font-weight: light;
+}
+.highlight {
+  font-weight: bold;
+  font-family: SF Compact Rounded;
+}
+@page {
+    size: A4 portrait;
+}
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+p {
+  margin: 0mm;
+}
+
+#main {
+  font-family: SF Pro Text;
+  font-weight: light;
+  color: #333;
+}
+
+table#main {
+  border-collapse: collapse;
+  margin: 25mm 19.1mm 0mm;
+}
+
+#main td {
+  border: 0.2mm dotted #333;
+  padding: 0;
+  width: 85.6mm;
+  max-width: 85.6mm;
+  height: 53.98mm;
+  max-height: 53.98mm;
+  overflow: auto;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  box-sizing: border-box;
+  height: inherit;
+  padding: 1mm;
+}
+
+.box-title {
+  align-items: center;
+  justify-content: center;
+}
+
+.box-notes {
+  justify-content: space-between;
+}
+
+.section {
+  display: flex;
+}
+
+.section-border {
+  border-bottom: 0.2mm #DDD dotted;
+}
+
+.section-icon {
+  max-height: 5mm;
+  min-width: 5mm;
+  padding: 1mm 1mm;
+}
+
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  border-radius: 3mm;
+  max-height: 3mm;
+  min-width: 3mm;
+  padding: 1mm;
+  margin-left: 1mm;
+}
+
+.section-text {
+  padding: 1mm 1mm;
+  text-align: justify;
+}
+
+.section-question {
+  align-items: center;
+}
+
+.lang {
+  background-color: #0072BB;
+  color: white;
+  width: 80%;
+  font-weight: bold;
+  margin: 2mm;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#section-symbols {
+  display: flex;
+  flex-direction: column;
+}
+
+#symbols {
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1mm;
+}
+
+.symbol {
+  width: 0.4cm;
+  height: 0.4cm;
+  margin-left: 1mm;
+}
+
+.thanks {
+  justify-content: center;
+}
+
+.question {
+  width: 100%;
+  margin-left: 2mm;
+  padding-bottom: 1mm;
+}
+
+.question-original {
+  font-size: 80%;
+}
+
+.question &gt .question-original,
+.question &gt .question-translated {
+  text-align: left;
+}
+
+.addNotes {
+  text-decoration: underline;
+  margin-top: 3mm;
+  margin-left: 2mm;
+}
+
+.footer {
+  display: flex;
+  height: 0.8cm;
+  padding: 1mm 0mm;
+  margin: 0 1mm;
+  align-items: center;
+  justify-content: start;
+  border-top: 1.2mm #333 solid;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1mm;
+  flex-grow: 1;
+  height: inherit;
+  justify-content: center;
+}
+
+.translated {
+  margin-top: 1mm;
+}
+
+#qr-code {
+  height: inherit;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 50px;
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    padding: 0 10px;
+    margin: 0;
+  }
+}
+div#main {
+  align-items: normal;
+}
+
+.lang {
+  font-size: 2em;
+}
+
+a {
+  text-decoration: underline;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.menubar a {
+  min-width: 300px;
+  text-align: center;
+}
+
+.box {
+  padding: 10px;
+}
+
+.section {
+  padding: 5px;
+}
+
+.section-question {
+  margin: 5px 0px;
+}
+
+.section-border {
+  border-bottom: 1px #DDD dotted;
+}
+
+.section-icon {
+  max-height: 50px;
+  min-width: 50px;
+  padding: 10px;
+}
+
+.section-number {
+  border-radius: 30px;
+  max-height: 30px;
+  min-width: 30px;
+  margin: 5px;
+  margin-left: 20px;
+  padding: 5px;
+}
+
+.section-text {
+  padding: 10px;
+}
+
+.lang {
+  width: 100%;
+  margin: 5px;
+}
+
+#symbols {
+  margin: 10px auto;
+}
+
+.symbol {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.question {
+  margin: 5px 15px;
+  padding-bottom: 5px;
+}
+
+.section-number {
+  padding: 15px;
+  width: 12px;
+  min-width: auto;
+  height: 12px;
+}
+
+.footer {
+  padding: 5px 0px;
+  margin: 0px 2px;
+  height: 55px;
+  border-top: 10px #333 solid;
+  justify-content: center;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  margin-left: 10px;
+  flex-grow: 0;
+  height: inherit;
+}
+
+.translated {
+  height: 50%;
+}
+  </style>
+</head>
+<body>
+  <h1>Coeliac-Safe Travel Translator</h1>
+  <p>Select a language to translate your dietary requirements for your holiday destination:</p>
+  <div id="translator">
+    <select id="language">
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="de">German</option>
+      <option value="it">Italian</option>
+      <option value="jp">Japanese</option>
+      <option value="grk">Greek</option>
+    </select>
+    <button onclick="translateText()">Translate</button>
+  </div>
+  <div id="translated-text"></div>
+
+  <script>
+    const translations = {
+      en:  `
+      <html>
+      <head>
+        <style>
+body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #translator {
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 10px;
+      margin-right: 10px;
+    }
+    #translated-text {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #333;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-width: 700px;
+      font-size: 1em;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .print-button {
+      margin-top: 10px;
+      display: block;
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .print-button:hover {
+      background-color: #0056b3;
+    }
+    @media print {
+      body * {
+        visibility: visible;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+      }
+      .print-button {
+        display: none;
+      }
+    }
+
+    @font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Semibold.ttf) format(truetype);
+  font-weight: bold;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Light.ttf) format(truetype);
+  font-weight: light;
+}
+.highlight {
+  font-weight: bold;
+  font-family: SF Compact Rounded;
+}
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+p {
+  margin: 0mm;
+}
+
+#main {
+  font-family: SF Pro Text;
+  font-weight: light;
+  color: #333;
+}
+
+table#main {
+  border-collapse: collapse;
+  margin: 25mm 19.1mm 0mm;
+}
+
+#main td {
+  border: 0.2mm dotted #333;
+  padding: 0;
+  width: 85.6mm;
+  max-width: 85.6mm;
+  height: 53.98mm;
+  max-height: 53.98mm;
+  overflow: auto;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  box-sizing: border-box;
+  height: inherit;
+  padding: 1mm;
+}
+
+.box-title {
+  align-items: center;
+  justify-content: center;
+}
+
+.box-notes {
+  justify-content: space-between;
+}
+
+.section {
+  display: flex;
+}
+
+.section-border {
+  border-bottom: 0.2mm #DDD dotted;
+}
+
+.section-icon {
+  max-height: 5mm;
+  min-width: 5mm;
+  padding: 1mm 1mm;
+}
+
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  border-radius: 3mm;
+  max-height: 3mm;
+  min-width: 3mm;
+  padding: 1mm;
+  margin-left: 1mm;
+}
+
+.section-text {
+  padding: 1mm 1mm;
+  text-align: justify;
+}
+
+.section-question {
+  align-items: center;
+}
+
+.lang {
+  background-color: #0072BB;
+  color: white;
+  width: 80%;
+  font-weight: bold;
+  margin: 2mm;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#section-symbols {
+  display: flex;
+  flex-direction: column;
+}
+
+#symbols {
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1mm;
+}
+
+.symbol {
+  width: 0.4cm;
+  height: 0.4cm;
+  margin-left: 1mm;
+}
+
+.thanks {
+  justify-content: center;
+}
+
+.question {
+  width: 100%;
+  margin-left: 2mm;
+  padding-bottom: 1mm;
+}
+
+.question-original {
+  font-size: 80%;
+}
+
+.question &gt .question-original,
+.question &gt .question-translated {
+  text-align: left;
+}
+
+.addNotes {
+  text-decoration: underline;
+  margin-top: 3mm;
+  margin-left: 2mm;
+}
+
+.footer {
+  display: flex;
+  height: 0.8cm;
+  padding: 1mm 0mm;
+  margin: 0 1mm;
+  align-items: center;
+  justify-content: start;
+  border-top: 1.2mm #333 solid;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1mm;
+  flex-grow: 1;
+  height: inherit;
+  justify-content: center;
+}
+
+.translated {
+  margin-top: 1mm;
+}
+
+#qr-code {
+  height: inherit;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 50px;
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    padding: 0 10px;
+    margin: 0;
+  }
+}
+div#main {
+  align-items: normal;
+}
+
+.lang {
+  font-size: 2em;
+}
+
+a {
+  text-decoration: underline;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.menubar a {
+  min-width: 300px;
+  text-align: center;
+}
+
+.box {
+  padding: 10px;
+}
+
+.section {
+  padding: 5px;
+}
+
+.section-question {
+  margin: 5px 0px;
+}
+
+.section-border {
+  border-bottom: 1px #DDD dotted;
+}
+
+.section-icon {
+  max-height: 50px;
+  min-width: 50px;
+  padding: 10px;
+}
+
+.section-number {
+  border-radius: 30px;
+  max-height: 30px;
+  min-width: 30px;
+  margin: 5px;
+  margin-left: 20px;
+  padding: 5px;
+}
+
+.section-text {
+  padding: 10px;
+}
+
+.lang {
+  width: 100%;
+  margin: 5px;
+}
+
+#symbols {
+  margin: 10px auto;
+}
+
+.symbol {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.question {
+  margin: 5px 15px;
+  padding-bottom: 5px;
+}
+
+.section-number {
+  padding: 15px;
+  width: 12px;
+  min-width: auto;
+  height: 12px;
+}
+
+.footer {
+  padding: 5px 0px;
+  margin: 0px 2px;
+  height: 55px;
+  border-top: 10px #333 solid;
+  justify-content: center;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  margin-left: 10px;
+  flex-grow: 0;
+  height: inherit;
+}
+
+.translated {
+  height: 50%;
+}
+
+
+        </style>
+      </head>
+      <body>
+ <div class="box">
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img1.png" />
+        <p class="section-text">I have a disease called <b> coeliac disease </b> and I must absolutely avoid foods that contain <b>gluten</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img2.png" />
+        <p class="section-text"><b>I can’t eat wheat</b> (including durum and spelt) or foods made from it, such as semolina, couscous, bulgur, as well as bread, breadcrumbs, pasta and egg noodles. I can’t eat breaded meat, or soups and sauces thickened with <b>wheat flour</b>. I also can’t eat foods containing <b>rye</b>, <b>barley</b> (including beer) or <b>oats</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img3.png" />
+        <p class="section-text"><b>I can eat</b>: <b>rice</b>, <b>corn</b>, millet, buckwheat, tapioca and potatoes (including flour made from these products), beans, peas, meat, fish, eggs, dairy products, vegetables, fruits, nuts and seeds, as long as they are not contaminated with the ingredients listed above.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img4.png" />
+        <div>
+            <p class="section-text"><b>Processed foods</b>, such as <b>soy sauce</b>, ketchup, mustard, spices and seasonings, stock cubes or processed meat, often also contain gluten — <b>please do not use them</b>. They can only be used if they are <b>gluten-free</b>. If you have any doubts, please ask me.</p>
+            <div id="symbols">
+                <span>Commonly used gluten-free symbols</span>
+                <img class="symbol" src="assets/img6.png" />
+                <img class="symbol" src="assets/img7.png" />
+                <img class="symbol" src="assets/img8.png" />
+            </div>
+        </div>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img5.png" />
+        <p class="section-text">Even <b>the smallest amount of gluten</b> will make me <b>very sick</b>, so to avoid contamination, please do not use kitchen utensils, water or oil that may have come into contact with any of the products that I can’t eat.</p>
+    </div>
+    <div class="section thanks">
+        <p class="section-text"><b>Thank you for your help and understanding.</b></p>
+    </div>
+</div>
+
+<div class="box">
+    <div class="section section-question">
+        <span class="section-number">1</span>
+        <div class="question section-border">
+            <p class="question-original">I can eat this.</p>
+            <p class="question-translated">I can eat this.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">2</span>
+        <div class="question section-border">
+            <p class="question-original">I can’t eat this.</p>
+            <p class="question-translated">I can’t eat this.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">3</span>
+        <div class="question section-border">
+            <p class="question-original">I am not sure.</p>
+            <p class="question-translated">I am not sure.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">4</span>
+        <div class="question section-border">
+            <p class="question-original">Does this food or sauce contain wheat flour?</p>
+            <p class="question-translated">Does this food or sauce contain wheat flour?</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">5</span>
+        <div class="question section-border">
+            <p class="question-original">What kind of grain is this food made from?</p>
+            <p class="question-translated">What kind of grain is this food made from?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">6</span>
+        <div class="question section-border">
+            <p class="question-original">Is this meal safe?</p>
+            <p class="question-translated">Is this meal safe?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">7</span>
+        <div class="question section-border">
+            <p class="question-original">Can you help me choose a dish from the menu?</p>
+            <p class="question-translated">Can you help me choose a dish from the menu?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">8</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add wheat flour.</p>
+            <p class="question-translated">Please do not add wheat flour.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">9</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add soy sauce.</p>
+            <p class="question-translated">Please do not add soy sauce.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">10</span>
+        <div class="question section-border">
+            <p class="question-original">Rice flour, cornflour, or potato starch are OK to use.</p>
+            <p class="question-translated">Rice flour, cornflour, or potato starch are OK to use.</p>
+        </div>
+    </div>
+</div>
+      </body>
+      </html>
+    `,
+      es: `<html>
+      <head>
+        <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #translator {
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 10px;
+      margin-right: 10px;
+    }
+    #translated-text {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #333;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-width: 700px;
+      font-size: 1em;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .print-button {
+      margin-top: 10px;
+      display: block;
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .print-button:hover {
+      background-color: #0056b3;
+    }
+    @media print {
+      body * {
+        visibility: visible;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+      }
+      .print-button {
+        display: none;
+      }
+    }
+
+    @font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Semibold.ttf) format(truetype);
+  font-weight: bold;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Light.ttf) format(truetype);
+  font-weight: light;
+}
+.highlight {
+  font-weight: bold;
+  font-family: SF Compact Rounded;
+}
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+p {
+  margin: 0mm;
+}
+
+#main {
+  font-family: SF Pro Text;
+  font-weight: light;
+  color: #333;
+}
+
+table#main {
+  border-collapse: collapse;
+  margin: 25mm 19.1mm 0mm;
+}
+
+#main td {
+  border: 0.2mm dotted #333;
+  padding: 0;
+  width: 85.6mm;
+  max-width: 85.6mm;
+  height: 53.98mm;
+  max-height: 53.98mm;
+  overflow: auto;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  box-sizing: border-box;
+  height: inherit;
+  padding: 1mm;
+}
+
+.box-title {
+  align-items: center;
+  justify-content: center;
+}
+
+.box-notes {
+  justify-content: space-between;
+}
+
+.section {
+  display: flex;
+}
+
+.section-border {
+  border-bottom: 0.2mm #DDD dotted;
+}
+
+.section-icon {
+  max-height: 5mm;
+  min-width: 5mm;
+  padding: 1mm 1mm;
+}
+
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  border-radius: 3mm;
+  max-height: 3mm;
+  min-width: 3mm;
+  padding: 1mm;
+  margin-left: 1mm;
+}
+
+.section-text {
+  padding: 1mm 1mm;
+  text-align: justify;
+}
+
+.section-question {
+  align-items: center;
+}
+
+.lang {
+  background-color: #0072BB;
+  color: white;
+  width: 80%;
+  font-weight: bold;
+  margin: 2mm;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#section-symbols {
+  display: flex;
+  flex-direction: column;
+}
+
+#symbols {
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1mm;
+}
+
+.symbol {
+  width: 0.4cm;
+  height: 0.4cm;
+  margin-left: 1mm;
+}
+
+.thanks {
+  justify-content: center;
+}
+
+.question {
+  width: 100%;
+  margin-left: 2mm;
+  padding-bottom: 1mm;
+}
+
+.question-original {
+  font-size: 80%;
+}
+
+.question &gt .question-original,
+.question &gt .question-translated {
+  text-align: left;
+}
+
+.addNotes {
+  text-decoration: underline;
+  margin-top: 3mm;
+  margin-left: 2mm;
+}
+
+.footer {
+  display: flex;
+  height: 0.8cm;
+  padding: 1mm 0mm;
+  margin: 0 1mm;
+  align-items: center;
+  justify-content: start;
+  border-top: 1.2mm #333 solid;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1mm;
+  flex-grow: 1;
+  height: inherit;
+  justify-content: center;
+}
+
+.translated {
+  margin-top: 1mm;
+}
+
+#qr-code {
+  height: inherit;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 50px;
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    padding: 0 10px;
+    margin: 0;
+  }
+}
+div#main {
+  align-items: normal;
+}
+
+.lang {
+  font-size: 2em;
+}
+
+a {
+  text-decoration: underline;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.menubar a {
+  min-width: 300px;
+  text-align: center;
+}
+
+.box {
+  padding: 10px;
+}
+
+.section {
+  padding: 5px;
+}
+
+.section-question {
+  margin: 5px 0px;
+}
+
+.section-border {
+  border-bottom: 1px #DDD dotted;
+}
+
+.section-icon {
+  max-height: 50px;
+  min-width: 50px;
+  padding: 10px;
+}
+
+.section-number {
+  border-radius: 30px;
+  max-height: 30px;
+  min-width: 30px;
+  margin: 5px;
+  margin-left: 20px;
+  padding: 5px;
+}
+
+.section-text {
+  padding: 10px;
+}
+
+.lang {
+  width: 100%;
+  margin: 5px;
+}
+
+#symbols {
+  margin: 10px auto;
+}
+
+.symbol {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.question {
+  margin: 5px 15px;
+  padding-bottom: 5px;
+}
+
+.section-number {
+  padding: 15px;
+  width: 12px;
+  min-width: auto;
+  height: 12px;
+}
+
+.footer {
+  padding: 5px 0px;
+  margin: 0px 2px;
+  height: 55px;
+  border-top: 10px #333 solid;
+  justify-content: center;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  margin-left: 10px;
+  flex-grow: 0;
+  height: inherit;
+}
+
+.translated {
+  height: 50%;
+}
+
+        </style>
+      </head>
+      <body>
+ <div class="box">
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img1.png" />
+        <p class="section-text">Tengo una enfermedad llamada <b> enfermedad celíaca</b> y debo evitar completamente alimentos que contengan <b>gluten</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img2.png" />
+        <p class="section-text"><b>No puedo comer trigo</b> (incluidos el trigo duro y la espelta) y los alimentos que se hacen de él, como sémola, cuscús, bulgur, así como pan, pan rallado, pasta y pasta al huevo. No puedo comer carne empanada ni sopas o salsas espesadas con <b>harina de trigo</b>. Tampoco puedo comer alimentos que contengan <b>centeno</b>, <b>cebada </b> (incluida la cerveza) o <b>avena</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img3.png" />
+        <p class="section-text">Los alimentos que <b>puedo comer</b> son: <b>arroz</b>, <b>maíz</b>, mijo, trigo sarraceno, tapioca y patatas (y también harina de estos alimentos), habas, guisante, carne, pescado, huevos, productos lácteos, verduras, frutas, nueces y semillas, a menos que estén contaminados con los ingredientes que se mencionan arriba.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img4.png" />
+        <div>
+            <p class="section-text"><b>Los alimentos procesados</b>, como <b>salsa de soja</b>, kétchup, mostaza, especias, cubos de caldo o carne procesada, a menudo también contienen gluten; <b>por favor, no los use</b>.  Solo se pueden usar si son <b>libres de gluten</b>. Si tiene alguna duda, por favor, pregúnteme.</p>
+            <div id="symbols">
+                <span>Símbolos comunes «sin gluten»</span>
+                <img class="symbol" src="assets/img6.png" />
+                <img class="symbol" src="assets/img7.png" />
+                <img class="symbol" src="assets/img8.png" />
+            </div>
+        </div>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img5.png" />
+        <p class="section-text">Incluso <b>la menor cantidad de gluten me enfermará mucho</b>, así que para evitar la contaminación, por favor, no use utensilios de cocina, agua o aceite que hayan estado en contacto con los productos que no puedo comer.</p>
+    </div>
+    <div class="section thanks">
+        <p class="section-text"><b>Gracias por su ayuda y comprensión.</b></p>
+    </div>
+</div>
+
+<div class="box">
+    <div class="section section-question">
+        <span class="section-number">1</span>
+        <div class="question section-border">
+            <p class="question-original">I can eat this.</p>
+            <p class="question-translated">Puedo comer esto.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">2</span>
+        <div class="question section-border">
+            <p class="question-original">I can’t eat this.</p>
+            <p class="question-translated">No puedo comer esto.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">3</span>
+        <div class="question section-border">
+            <p class="question-original">I am not sure.</p>
+            <p class="question-translated">No estoy seguro.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">4</span>
+        <div class="question section-border">
+            <p class="question-original">Does this food or sauce contain wheat flour?</p>
+            <p class="question-translated">¿Esta comida o salsa contiene gluten?</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">5</span>
+        <div class="question section-border">
+            <p class="question-original">What kind of grain is this food made from?</p>
+            <p class="question-translated">¿De qué tipo de grano está hecha esta comida?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">6</span>
+        <div class="question section-border">
+            <p class="question-original">Is this meal safe?</p>
+            <p class="question-translated">¿Es segura esta comida?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">7</span>
+        <div class="question section-border">
+            <p class="question-original">Can you help me choose a dish from the menu?</p>
+            <p class="question-translated">¿Me puede ayudar a elegir un plato del menú?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">8</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add wheat flour.</p>
+            <p class="question-translated">Por favor, no añada harina de trigo.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">9</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add soy sauce.</p>
+            <p class="question-translated">Por favor, no añada salsa de soja.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">10</span>
+        <div class="question section-border">
+            <p class="question-original">Rice flour, cornflour, or potato starch are OK to use.</p>
+            <p class="question-translated">lHarina de arroz, harina de maíz o fécula de patata sí se pueden usar.</p>
+        </div>
+    </div>
+</div>
+      </body>
+      </html>
+    `,
+      fr: `<html>
+      <head>
+        <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #translator {
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 10px;
+      margin-right: 10px;
+    }
+    #translated-text {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #333;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-width: 700px;
+      font-size: 1em;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .print-button {
+      margin-top: 10px;
+      display: block;
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .print-button:hover {
+      background-color: #0056b3;
+    }
+    @media print {
+      body * {
+        visibility: visible;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+      }
+      .print-button {
+        display: none;
+      }
+    }
+
+    @font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Semibold.ttf) format(truetype);
+  font-weight: bold;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Light.ttf) format(truetype);
+  font-weight: light;
+}
+.highlight {
+  font-weight: bold;
+  font-family: SF Compact Rounded;
+}
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+p {
+  margin: 0mm;
+}
+
+#main {
+  font-family: SF Pro Text;
+  font-weight: light;
+  color: #333;
+}
+
+table#main {
+  border-collapse: collapse;
+  margin: 25mm 19.1mm 0mm;
+}
+
+#main td {
+  border: 0.2mm dotted #333;
+  padding: 0;
+  width: 85.6mm;
+  max-width: 85.6mm;
+  height: 53.98mm;
+  max-height: 53.98mm;
+  overflow: auto;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  box-sizing: border-box;
+  height: inherit;
+  padding: 1mm;
+}
+
+.box-title {
+  align-items: center;
+  justify-content: center;
+}
+
+.box-notes {
+  justify-content: space-between;
+}
+
+.section {
+  display: flex;
+}
+
+.section-border {
+  border-bottom: 0.2mm #DDD dotted;
+}
+
+.section-icon {
+  max-height: 5mm;
+  min-width: 5mm;
+  padding: 1mm 1mm;
+}
+
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  border-radius: 3mm;
+  max-height: 3mm;
+  min-width: 3mm;
+  padding: 1mm;
+  margin-left: 1mm;
+}
+
+.section-text {
+  padding: 1mm 1mm;
+  text-align: justify;
+}
+
+.section-question {
+  align-items: center;
+}
+
+.lang {
+  background-color: #0072BB;
+  color: white;
+  width: 80%;
+  font-weight: bold;
+  margin: 2mm;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#section-symbols {
+  display: flex;
+  flex-direction: column;
+}
+
+#symbols {
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1mm;
+}
+
+.symbol {
+  width: 0.4cm;
+  height: 0.4cm;
+  margin-left: 1mm;
+}
+
+.thanks {
+  justify-content: center;
+}
+
+.question {
+  width: 100%;
+  margin-left: 2mm;
+  padding-bottom: 1mm;
+}
+
+.question-original {
+  font-size: 80%;
+}
+
+.question &gt .question-original,
+.question &gt .question-translated {
+  text-align: left;
+}
+
+.addNotes {
+  text-decoration: underline;
+  margin-top: 3mm;
+  margin-left: 2mm;
+}
+
+.footer {
+  display: flex;
+  height: 0.8cm;
+  padding: 1mm 0mm;
+  margin: 0 1mm;
+  align-items: center;
+  justify-content: start;
+  border-top: 1.2mm #333 solid;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1mm;
+  flex-grow: 1;
+  height: inherit;
+  justify-content: center;
+}
+
+.translated {
+  margin-top: 1mm;
+}
+
+#qr-code {
+  height: inherit;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 50px;
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    padding: 0 10px;
+    margin: 0;
+  }
+}
+div#main {
+  align-items: normal;
+}
+
+.lang {
+  font-size: 2em;
+}
+
+a {
+  text-decoration: underline;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.menubar a {
+  min-width: 300px;
+  text-align: center;
+}
+
+.box {
+  padding: 10px;
+}
+
+.section {
+  padding: 5px;
+}
+
+.section-question {
+  margin: 5px 0px;
+}
+
+.section-border {
+  border-bottom: 1px #DDD dotted;
+}
+
+.section-icon {
+  max-height: 50px;
+  min-width: 50px;
+  padding: 10px;
+}
+
+.section-number {
+  border-radius: 30px;
+  max-height: 30px;
+  min-width: 30px;
+  margin: 5px;
+  margin-left: 20px;
+  padding: 5px;
+}
+
+.section-text {
+  padding: 10px;
+}
+
+.lang {
+  width: 100%;
+  margin: 5px;
+}
+
+#symbols {
+  margin: 10px auto;
+}
+
+.symbol {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.question {
+  margin: 5px 15px;
+  padding-bottom: 5px;
+}
+
+.section-number {
+  padding: 15px;
+  width: 12px;
+  min-width: auto;
+  height: 12px;
+}
+
+.footer {
+  padding: 5px 0px;
+  margin: 0px 2px;
+  height: 55px;
+  border-top: 10px #333 solid;
+  justify-content: center;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  margin-left: 10px;
+  flex-grow: 0;
+  height: inherit;
+}
+
+.translated {
+  height: 50%;
+}
+
+        </style>
+      </head>
+      <body>
+ <div class="box">
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img1.png" />
+        <p class="section-text">Je souffre d’une <b> maladie cœliaque</b>, et je dois absolument éviter les aliments qui contiennent du <b>gluten</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img2.png" />
+        <p class="section-text"><b>Je ne peux pas manger de blé</b> (y compris de blé dur et de l’épeautre) ainsi que des aliments qui en sont dérivés comme la semoule, le couscous, le boulgour, le pain, la chapelure, les pâtes et les pâtes aux œufs. Je ne peux pas manger de la viande panée ainsi que des soupes et des sauces épaissies avec de la <b>farine de blé</b>. En plus, je ne peux pas manger d'aliments contenant du <b>seigle</b>, de <b>l'orge </b>  (y compris de la bière) et de <b>l'avoine</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img3.png" />
+        <p class="section-text">Les aliments que<b>je peux manger</b>sont <b>le riz</b>, <b>le maïs</b>, le millet, le sarrasin, le tapioca et les pommes de terre (y compris les farines de ceux-ci), les haricots, les pois, la viande, le poisson, les œufs, les produits laitiers, les légumes, les fruits, les noix et les graines, sauf s'ils sont contaminés par les ingrédients ci-dessus.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img4.png" />
+        <div>
+            <p class="section-text">Les <b>aliments transformés</b> comme la <b>sauce soja</b>, le ketchup, la moutarde, les épices, les cubes de bouillon ou la viande transformée souvent contiennent du gluten aussi – <b>veuillez ne pas les utiliser</b>.  Ils ne peuvent être utilisés que dans le cas où ils sont totalement <b>exempts de gluten</b>. Si vous avez des doutes, n'hésitez pas à me les demander.</p>
+            <div id="symbols">
+                <span>Symboles les plus courants des aliments sans gluten</span>
+                <img class="symbol" src="assets/img6.png" />
+                <img class="symbol" src="assets/img7.png" />
+                <img class="symbol" src="assets/img8.png" />
+            </div>
+        </div>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img5.png" />
+        <p class="section-text"><b>Même des quantités très faibles de gluten</b> me rendront <b>très malade</b>, donc, afin d’éviter toute contamination, n'utilisez pas d'ustensiles de cuisine, d'eau ou d'huile qui sont entrés en contact avec des produits que je ne peux pas manger.</p>
+    </div>
+    <div class="section thanks">
+        <p class="section-text"><b>Merci beaucoup pour votre aide et votre compassion.</b></p>
+    </div>
+</div>
+
+<div class="box">
+    <div class="section section-question">
+        <span class="section-number">1</span>
+        <div class="question section-border">
+            <p class="question-original">I can eat this.</p>
+            <p class="question-translated">Je peux manger cela.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">2</span>
+        <div class="question section-border">
+            <p class="question-original">I can’t eat this.</p>
+            <p class="question-translated">Je ne peux pas manger cela.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">3</span>
+        <div class="question section-border">
+            <p class="question-original">I am not sure.</p>
+            <p class="question-translated">Je n'en suis pas sûr(e).</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">4</span>
+        <div class="question section-border">
+            <p class="question-original">Does this food or sauce contain wheat flour?</p>
+            <p class="question-translated">Ces aliments ou cette sauce, contiennent-ils de la farine de blé?</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">5</span>
+        <div class="question section-border">
+            <p class="question-original">What kind of grain is this food made from?</p>
+            <p class="question-translated">Quel type de grain était utilisé pour préparer ce plat?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">6</span>
+        <div class="question section-border">
+            <p class="question-original">Is this meal safe?</p>
+            <p class="question-translated">Ce repas, est-il sans risque pour moi?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">7</span>
+        <div class="question section-border">
+            <p class="question-original">Can you help me choose a dish from the menu?</p>
+            <p class="question-translated">Puis-je demander votre aide à choisir un plat du menu?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">8</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add wheat flour.</p>
+            <p class="question-translated">Veuillez ne pas ajouter de farine de blé.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">9</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add soy sauce.</p>
+            <p class="question-translated">Veuillez ne pas ajouter de sauce soja.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">10</span>
+        <div class="question section-border">
+            <p class="question-original">Rice flour, cornflour, or potato starch are OK to use.</p>
+            <p class="question-translated">Vous pouvez utiliser de la farine de riz, de la farine de maïs ou de la fécule de pomme de terre.</p>
+        </div>
+    </div>
+</div>
+      </body>
+      </html>
+    `,
+      de: `
+      <html>
+      <head>
+        <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #translator {
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 10px;
+      margin-right: 10px;
+    }
+    #translated-text {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #333;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-width: 700px;
+      font-size: 1em;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .print-button {
+      margin-top: 10px;
+      display: block;
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .print-button:hover {
+      background-color: #0056b3;
+    }
+    @media print {
+      body * {
+        visibility: visible;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+      }
+      .print-button {
+        display: none;
+      }
+    }
+
+    @font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Semibold.ttf) format(truetype);
+  font-weight: bold;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Light.ttf) format(truetype);
+  font-weight: light;
+}
+.highlight {
+  font-weight: bold;
+  font-family: SF Compact Rounded;
+}
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+p {
+  margin: 0mm;
+}
+
+#main {
+  font-family: SF Pro Text;
+  font-weight: light;
+  color: #333;
+}
+
+table#main {
+  border-collapse: collapse;
+  margin: 25mm 19.1mm 0mm;
+}
+
+#main td {
+  border: 0.2mm dotted #333;
+  padding: 0;
+  width: 85.6mm;
+  max-width: 85.6mm;
+  height: 53.98mm;
+  max-height: 53.98mm;
+  overflow: auto;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  box-sizing: border-box;
+  height: inherit;
+  padding: 1mm;
+}
+
+.box-title {
+  align-items: center;
+  justify-content: center;
+}
+
+.box-notes {
+  justify-content: space-between;
+}
+
+.section {
+  display: flex;
+}
+
+.section-border {
+  border-bottom: 0.2mm #DDD dotted;
+}
+
+.section-icon {
+  max-height: 5mm;
+  min-width: 5mm;
+  padding: 1mm 1mm;
+}
+
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  border-radius: 3mm;
+  max-height: 3mm;
+  min-width: 3mm;
+  padding: 1mm;
+  margin-left: 1mm;
+}
+
+.section-text {
+  padding: 1mm 1mm;
+  text-align: justify;
+}
+
+.section-question {
+  align-items: center;
+}
+
+.lang {
+  background-color: #0072BB;
+  color: white;
+  width: 80%;
+  font-weight: bold;
+  margin: 2mm;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#section-symbols {
+  display: flex;
+  flex-direction: column;
+}
+
+#symbols {
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1mm;
+}
+
+.symbol {
+  width: 0.4cm;
+  height: 0.4cm;
+  margin-left: 1mm;
+}
+
+.thanks {
+  justify-content: center;
+}
+
+.question {
+  width: 100%;
+  margin-left: 2mm;
+  padding-bottom: 1mm;
+}
+
+.question-original {
+  font-size: 80%;
+}
+
+.question &gt .question-original,
+.question &gt .question-translated {
+  text-align: left;
+}
+
+.addNotes {
+  text-decoration: underline;
+  margin-top: 3mm;
+  margin-left: 2mm;
+}
+
+.footer {
+  display: flex;
+  height: 0.8cm;
+  padding: 1mm 0mm;
+  margin: 0 1mm;
+  align-items: center;
+  justify-content: start;
+  border-top: 1.2mm #333 solid;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1mm;
+  flex-grow: 1;
+  height: inherit;
+  justify-content: center;
+}
+
+.translated {
+  margin-top: 1mm;
+}
+
+#qr-code {
+  height: inherit;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 50px;
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    padding: 0 10px;
+    margin: 0;
+  }
+}
+div#main {
+  align-items: normal;
+}
+
+.lang {
+  font-size: 2em;
+}
+
+a {
+  text-decoration: underline;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.menubar a {
+  min-width: 300px;
+  text-align: center;
+}
+
+.box {
+  padding: 10px;
+}
+
+.section {
+  padding: 5px;
+}
+
+.section-question {
+  margin: 5px 0px;
+}
+
+.section-border {
+  border-bottom: 1px #DDD dotted;
+}
+
+.section-icon {
+  max-height: 50px;
+  min-width: 50px;
+  padding: 10px;
+}
+
+.section-number {
+  border-radius: 30px;
+  max-height: 30px;
+  min-width: 30px;
+  margin: 5px;
+  margin-left: 20px;
+  padding: 5px;
+}
+
+.section-text {
+  padding: 10px;
+}
+
+.lang {
+  width: 100%;
+  margin: 5px;
+}
+
+#symbols {
+  margin: 10px auto;
+}
+
+.symbol {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.question {
+  margin: 5px 15px;
+  padding-bottom: 5px;
+}
+
+.section-number {
+  padding: 15px;
+  width: 12px;
+  min-width: auto;
+  height: 12px;
+}
+
+.footer {
+  padding: 5px 0px;
+  margin: 0px 2px;
+  height: 55px;
+  border-top: 10px #333 solid;
+  justify-content: center;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  margin-left: 10px;
+  flex-grow: 0;
+  height: inherit;
+}
+
+.translated {
+  height: 50%;
+}
+        </style>
+      </head>
+      <body>
+ <div class="box">
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img1.png" />
+        <p class="section-text">Ich habe eine Krankheit, die <b> Zöliakie </b> genannt wird. Deswegen muss ich unbedingt <b>glutenhaltige</b>Lebensmittel vermeiden.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img2.png" />
+        <p class="section-text"><b>Ich kann keinen Weizen essen</b> (einschließlich Durum und Dinkel) und daraus hergestellte Lebensmittel wie Grieß, Couscous, Bulgur und Brot, Semmelbrösel, Nudeln und Eiernudeln. Ich kann kein paniertes Fleisch und mit <b>Weizenmehl</b>eingedickten Suppen und Soßen essen. Ich kann auch keine Lebensmittel essen, die <b>Roggen</b>, <b>Gerste</b> (einschließlich Bier) und <b>Hafer</b>enthalten.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img3.png" />
+        <p class="section-text">Die Lebensmittel, die<b>ich essen kann</b>, sind <b>Reis</b>, <b>Mais</b>, Hirse, Buchweizen, Tapioka und Kartoffeln (einschließlich Mehl), Bohnen, Erbsen, Fleisch, Fisch, Eier, Milchprodukte, Gemüse, Obst, Nüsse und Samen, es sei denn, sie sind mit den oben genannten Zutaten verunreinigt.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img4.png" />
+        <div>
+            <p class="section-text">Häufig enthalten auch <b>verarbeitete Lebensmittel</b> wie <b>Sojasauce</b>, Ketchup, Senf, Gewürze, Brühwürfel oder Fleischwaren Gluten – <b>bitte verwenden Sie sie nicht</b>. Sie können nur verwendet werden, wenn sie <b>glutenfrei</b> sind. Wenn Sie irgendwelche Zweifel haben, fragen Sie bitte mich.</p>
+            <div id="symbols">
+                <span>Häufig verwendete Symbole für „glutenfrei“</span>
+                <img class="symbol" src="assets/img6.png" />
+                <img class="symbol" src="assets/img7.png" />
+                <img class="symbol" src="assets/img8.png" />
+            </div>
+        </div>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img5.png" />
+        <p class="section-text">Sogar <b>die kleinste Menge an Gluten</b> wird mich <b>sehr krank</b> machen. Um eine Verunreinigung zu vermeiden, verwenden Sie bitte keine Küchenutensilien, Wasser oder Öl, die mit den Produkten in Berührung gekommen sind, die ich nicht essen kann.</p>
+    </div>
+    <div class="section thanks">
+        <p class="section-text"><b>Vielen Dank für Ihre Hilfe und Ihr Verständnis.</b></p>
+    </div>
+</div>
+
+<div class="box">
+    <div class="section section-question">
+        <span class="section-number">1</span>
+        <div class="question section-border">
+            <p class="question-original">I can eat this.</p>
+            <p class="question-translated">Das kann ich essen.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">2</span>
+        <div class="question section-border">
+            <p class="question-original">I can’t eat this.</p>
+            <p class="question-translated">Das kann ich nicht essen.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">3</span>
+        <div class="question section-border">
+            <p class="question-original">I am not sure.</p>
+            <p class="question-translated">Ich bin mir nicht sicher.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">4</span>
+        <div class="question section-border">
+            <p class="question-original">Does this food or sauce contain wheat flour?</p>
+            <p class="question-translated">Enthält dieses Lebensmittel odpoter diese Sauce Weizenmehl?</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">5</span>
+        <div class="question section-border">
+            <p class="question-original">What kind of grain is this food made from?</p>
+            <p class="question-translated">Aus welcher Art von Getreide wurde dieses Lebensmittel vorbereitet?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">6</span>
+        <div class="question section-border">
+            <p class="question-original">Is this meal safe?</p>
+            <p class="question-translated">Ist diese Speise sicher?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">7</span>
+        <div class="question section-border">
+            <p class="question-original">Can you help me choose a dish from the menu?</p>
+            <p class="question-translated">Darf ich Sie um Hilfe bei der Auswahl eines Gerichtes aus der Speisekarte bitten?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">8</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add wheat flour.</p>
+            <p class="question-translated">Bitte fügen Sie kein Weizenmehl hinzu.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">9</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add soy sauce.</p>
+            <p class="question-translated">Bitte fügen keine Sojasauce hinzu.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">10</span>
+        <div class="question section-border">
+            <p class="question-original">Rice flour, cornflour, or potato starch are OK to use.</p>
+            <p class="question-translated">Es kann Reismehl, Maismehl oder Kartoffelstärke verwendet werden.</p>
+        </div>
+    </div>
+</div>
+      </body>
+      </html>
+    `,
+      it: `
+      <html>
+      <head>
+        <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #translator {
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 10px;
+      margin-right: 10px;
+    }
+    #translated-text {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #333;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-width: 700px;
+      font-size: 1em;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .print-button {
+      margin-top: 10px;
+      display: block;
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .print-button:hover {
+      background-color: #0056b3;
+    }
+    @media print {
+      body * {
+        visibility: visible;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+      }
+      .print-button {
+        display: none;
+      }
+    }
+
+    @font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Semibold.ttf) format(truetype);
+  font-weight: bold;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Light.ttf) format(truetype);
+  font-weight: light;
+}
+.highlight {
+  font-weight: bold;
+  font-family: SF Compact Rounded;
+}
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+p {
+  margin: 0mm;
+}
+
+#main {
+  font-family: SF Pro Text;
+  font-weight: light;
+  color: #333;
+}
+
+table#main {
+  border-collapse: collapse;
+  margin: 25mm 19.1mm 0mm;
+}
+
+#main td {
+  border: 0.2mm dotted #333;
+  padding: 0;
+  width: 85.6mm;
+  max-width: 85.6mm;
+  height: 53.98mm;
+  max-height: 53.98mm;
+  overflow: auto;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  box-sizing: border-box;
+  height: inherit;
+  padding: 1mm;
+}
+
+.box-title {
+  align-items: center;
+  justify-content: center;
+}
+
+.box-notes {
+  justify-content: space-between;
+}
+
+.section {
+  display: flex;
+}
+
+.section-border {
+  border-bottom: 0.2mm #DDD dotted;
+}
+
+.section-icon {
+  max-height: 5mm;
+  min-width: 5mm;
+  padding: 1mm 1mm;
+}
+
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  border-radius: 3mm;
+  max-height: 3mm;
+  min-width: 3mm;
+  padding: 1mm;
+  margin-left: 1mm;
+}
+
+.section-text {
+  padding: 1mm 1mm;
+  text-align: justify;
+}
+
+.section-question {
+  align-items: center;
+}
+
+.lang {
+  background-color: #0072BB;
+  color: white;
+  width: 80%;
+  font-weight: bold;
+  margin: 2mm;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#section-symbols {
+  display: flex;
+  flex-direction: column;
+}
+
+#symbols {
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1mm;
+}
+
+.symbol {
+  width: 0.4cm;
+  height: 0.4cm;
+  margin-left: 1mm;
+}
+
+.thanks {
+  justify-content: center;
+}
+
+.question {
+  width: 100%;
+  margin-left: 2mm;
+  padding-bottom: 1mm;
+}
+
+.question-original {
+  font-size: 80%;
+}
+
+.question &gt .question-original,
+.question &gt .question-translated {
+  text-align: left;
+}
+
+.addNotes {
+  text-decoration: underline;
+  margin-top: 3mm;
+  margin-left: 2mm;
+}
+
+.footer {
+  display: flex;
+  height: 0.8cm;
+  padding: 1mm 0mm;
+  margin: 0 1mm;
+  align-items: center;
+  justify-content: start;
+  border-top: 1.2mm #333 solid;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1mm;
+  flex-grow: 1;
+  height: inherit;
+  justify-content: center;
+}
+
+.translated {
+  margin-top: 1mm;
+}
+
+#qr-code {
+  height: inherit;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 50px;
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    padding: 0 10px;
+    margin: 0;
+  }
+}
+div#main {
+  align-items: normal;
+}
+
+.lang {
+  font-size: 2em;
+}
+
+a {
+  text-decoration: underline;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.menubar a {
+  min-width: 300px;
+  text-align: center;
+}
+
+.box {
+  padding: 10px;
+}
+
+.section {
+  padding: 5px;
+}
+
+.section-question {
+  margin: 5px 0px;
+}
+
+.section-border {
+  border-bottom: 1px #DDD dotted;
+}
+
+.section-icon {
+  max-height: 50px;
+  min-width: 50px;
+  padding: 10px;
+}
+
+.section-number {
+  border-radius: 30px;
+  max-height: 30px;
+  min-width: 30px;
+  margin: 5px;
+  margin-left: 20px;
+  padding: 5px;
+}
+
+.section-text {
+  padding: 10px;
+}
+
+.lang {
+  width: 100%;
+  margin: 5px;
+}
+
+#symbols {
+  margin: 10px auto;
+}
+
+.symbol {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.question {
+  margin: 5px 15px;
+  padding-bottom: 5px;
+}
+
+.section-number {
+  padding: 15px;
+  width: 12px;
+  min-width: auto;
+  height: 12px;
+}
+
+.footer {
+  padding: 5px 0px;
+  margin: 0px 2px;
+  height: 55px;
+  border-top: 10px #333 solid;
+  justify-content: center;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  margin-left: 10px;
+  flex-grow: 0;
+  height: inherit;
+}
+
+.translated {
+  height: 50%;
+}
+        </style>
+      </head>
+      <body>
+ <div class="box">
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img1.png" />
+        <p class="section-text">Ho una malattia chiamata <b> celiachia </b> e devo assolutamente evitare gli alimenti che contengono <b>glutine</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img2.png" />
+        <p class="section-text"><b>Non posso mangiare grano</b> (il grano duro e il farro compresi) e gli alimenti fatti da grano, come semolino, cuscussù, bulgur e pane, pane grattugiato, pasta e pasta all'uovo. Non posso mangiare carne impanata e zuppe oppure salse addensate con <b>farina di grano</b>. Non posso neanche mangiare gli alimenti che contengono <b>segale</b>, <b>orzo</b> (compresa la birra) e <b>avena</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img3.png" />
+        <p class="section-text">Gli alimenti che <b>posso mangiare </b>sono i seguenti: <b>riso</b>, <b>mais</b>, miglio, grano saraceno, tapioca e patate (farine comprese), fagioli, piselli, carne, pesce, uova, latticini, verdura, frutta, noci e semi, purché non siano contaminati dagli ingredienti sopra elencati.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img4.png" />
+        <div>
+            <p class="section-text">Spesso anche <b>gli alimenti trasformati</b>, come <b>la salsa di soia</b>, il ketchup, la senape, le spezie, i cubetti di brodo o la carne trasformata contengono glutine – <b>per favore non usarli</b>. Possono essere utilizzati solo se sono contrassegnati come <b>privi di glutine</b>. In caso di dubbio, per favore chiedermi.</p>
+            <div id="symbols">
+                <span>Simboli “senza glutine” comunemente usati</span>
+                <img class="symbol" src="assets/img6.png" />
+                <img class="symbol" src="assets/img7.png" />
+                <img class="symbol" src="assets/img8.png" />
+            </div>
+        </div>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img5.png" />
+        <p class="section-text">Anche la <b>più piccola quantità di glutine</b> mi farà <b>molto male</b>, quindi, per evitare la contaminazione, per favore non utilizzare utensili da cucina, acqua o olio che sono stati a contatto con prodotti che non posso mangiare.</p>
+    </div>
+    <div class="section thanks">
+        <p class="section-text"><b>Grazie mille per il suo aiuto e comprensione.</b></p>
+    </div>
+</div>
+
+<div class="box">
+    <div class="section section-question">
+        <span class="section-number">1</span>
+        <div class="question section-border">
+            <p class="question-original">I can eat this.</p>
+            <p class="question-translated">Posso mangiarlo</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">2</span>
+        <div class="question section-border">
+            <p class="question-original">I can’t eat this.</p>
+            <p class="question-translated">Non posso mangiarlo</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">3</span>
+        <div class="question section-border">
+            <p class="question-original">I am not sure.</p>
+            <p class="question-translated">Non sono sicuro/-a</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">4</span>
+        <div class="question section-border">
+            <p class="question-original">Does this food or sauce contain wheat flour?</p>
+            <p class="question-translated">Questo cibo o salsa contiene farina di grano?</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">5</span>
+        <div class="question section-border">
+            <p class="question-original">What kind of grain is this food made from?</p>
+            <p class="question-translated">Di che cereale è fatto questo cibo?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">6</span>
+        <div class="question section-border">
+            <p class="question-original">Is this meal safe?</p>
+            <p class="question-translated">Questo pasto è sicuro?
+
+</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">7</span>
+        <div class="question section-border">
+            <p class="question-original">Can you help me choose a dish from the menu?</p>
+            <p class="question-translated">Posso chiedere assistenza nella scelta dei piatti dal menu?</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">8</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add wheat flour.</p>
+            <p class="question-translated">Per favore non aggiungere farina di grano.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">9</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add soy sauce.</p>
+            <p class="question-translated">Per favore non aggiungere salsa di soia.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">10</span>
+        <div class="question section-border">
+            <p class="question-original">Rice flour, cornflour, or potato starch are OK to use.</p>
+            <p class="question-translated">Può essere usata farina di riso, mais o fecola di patate.</p>
+        </div>
+    </div>
+</div>
+      </body>
+      </html>
+    `,
+      jp: `
+      <html>
+      <head>
+        <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #translator {
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 10px;
+      margin-right: 10px;
+    }
+    #translated-text {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #333;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-width: 700px;
+      font-size: 1em;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .print-button {
+      margin-top: 10px;
+      display: block;
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .print-button:hover {
+      background-color: #0056b3;
+    }
+    @media print {
+      body * {
+        visibility: visible;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+      }
+      .print-button {
+        display: none;
+      }
+    }
+
+    @font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Semibold.ttf) format(truetype);
+  font-weight: bold;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Light.ttf) format(truetype);
+  font-weight: light;
+}
+.highlight {
+  font-weight: bold;
+  font-family: SF Compact Rounded;
+}
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+p {
+  margin: 0mm;
+}
+
+#main {
+  font-family: SF Pro Text;
+  font-weight: light;
+  color: #333;
+}
+
+table#main {
+  border-collapse: collapse;
+  margin: 25mm 19.1mm 0mm;
+}
+
+#main td {
+  border: 0.2mm dotted #333;
+  padding: 0;
+  width: 85.6mm;
+  max-width: 85.6mm;
+  height: 53.98mm;
+  max-height: 53.98mm;
+  overflow: auto;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  box-sizing: border-box;
+  height: inherit;
+  padding: 1mm;
+}
+
+.box-title {
+  align-items: center;
+  justify-content: center;
+}
+
+.box-notes {
+  justify-content: space-between;
+}
+
+.section {
+  display: flex;
+}
+
+.section-border {
+  border-bottom: 0.2mm #DDD dotted;
+}
+
+.section-icon {
+  max-height: 5mm;
+  min-width: 5mm;
+  padding: 1mm 1mm;
+}
+
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  border-radius: 3mm;
+  max-height: 3mm;
+  min-width: 3mm;
+  padding: 1mm;
+  margin-left: 1mm;
+}
+
+.section-text {
+  padding: 1mm 1mm;
+  text-align: justify;
+}
+
+.section-question {
+  align-items: center;
+}
+
+.lang {
+  background-color: #0072BB;
+  color: white;
+  width: 80%;
+  font-weight: bold;
+  margin: 2mm;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#section-symbols {
+  display: flex;
+  flex-direction: column;
+}
+
+#symbols {
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1mm;
+}
+
+.symbol {
+  width: 0.4cm;
+  height: 0.4cm;
+  margin-left: 1mm;
+}
+
+.thanks {
+  justify-content: center;
+}
+
+.question {
+  width: 100%;
+  margin-left: 2mm;
+  padding-bottom: 1mm;
+}
+
+.question-original {
+  font-size: 80%;
+}
+
+.question &gt .question-original,
+.question &gt .question-translated {
+  text-align: left;
+}
+
+.addNotes {
+  text-decoration: underline;
+  margin-top: 3mm;
+  margin-left: 2mm;
+}
+
+.footer {
+  display: flex;
+  height: 0.8cm;
+  padding: 1mm 0mm;
+  margin: 0 1mm;
+  align-items: center;
+  justify-content: start;
+  border-top: 1.2mm #333 solid;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1mm;
+  flex-grow: 1;
+  height: inherit;
+  justify-content: center;
+}
+
+.translated {
+  margin-top: 1mm;
+}
+
+#qr-code {
+  height: inherit;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 50px;
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    padding: 0 10px;
+    margin: 0;
+  }
+}
+div#main {
+  align-items: normal;
+}
+
+.lang {
+  font-size: 2em;
+}
+
+a {
+  text-decoration: underline;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.menubar a {
+  min-width: 300px;
+  text-align: center;
+}
+
+.box {
+  padding: 10px;
+}
+
+.section {
+  padding: 5px;
+}
+
+.section-question {
+  margin: 5px 0px;
+}
+
+.section-border {
+  border-bottom: 1px #DDD dotted;
+}
+
+.section-icon {
+  max-height: 50px;
+  min-width: 50px;
+  padding: 10px;
+}
+
+.section-number {
+  border-radius: 30px;
+  max-height: 30px;
+  min-width: 30px;
+  margin: 5px;
+  margin-left: 20px;
+  padding: 5px;
+}
+
+.section-text {
+  padding: 10px;
+}
+
+.lang {
+  width: 100%;
+  margin: 5px;
+}
+
+#symbols {
+  margin: 10px auto;
+}
+
+.symbol {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.question {
+  margin: 5px 15px;
+  padding-bottom: 5px;
+}
+
+.section-number {
+  padding: 15px;
+  width: 12px;
+  min-width: auto;
+  height: 12px;
+}
+
+.footer {
+  padding: 5px 0px;
+  margin: 0px 2px;
+  height: 55px;
+  border-top: 10px #333 solid;
+  justify-content: center;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  margin-left: 10px;
+  flex-grow: 0;
+  height: inherit;
+}
+
+.translated {
+  height: 50%;
+}
+        </style>
+      </head>
+      <body>
+ <div class="box">
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img1.png" />
+        <p class="section-text">私は <b> セリアック病（グルテン性腸症）</b> という病気を患っ ており、<b>グルテン</b> を含む食事は一切食べられま せん.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img2.png" />
+        <p class="section-text"><b>私は小麦</b> デュラムや綴りを含む）や小麦粉が含まれている食品を一切 <b>食べられません</b>. 従って、セモリナ・クスクス・ブルガー・パン・パン粉・パスタ・卵麺等が食べられません。 <b>小麦粉</b> が含まれているパン粉で揚げられた肉や小麦粉が含まれているスープやソース等を食べられません。<b>ライ麦・大麦</b>（ビール含む）<b>・オート麦</b> 等が含む食品を食べられません。</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img3.png" />
+        <p class="section-text">私は、<b>米、とうもろこし</b> 、粟、そば、タピオカ、ジャガイモ（ジャガイモのでんぷんを含む）、豆、エンドウ豆、肉、魚、卵、乳製品、野菜、果物、ナッツや種子は（上記の成分で汚染されていない限り）<b>食べられます。</b></p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img4.png" />
+        <div>
+            <p class="section-text"><b>醤油・</b> ケチャップ・マスタード・スパイス・ブイヨンキューブ・加工肉等の <b>調理された食品</b> にもグルテンがよく使われているのでこのような食品を <b>使用しないで下さい。グルテンフリー</b> と言うマークがされている商品のみ使用できます。もし、グルテンが含まれているか 不確かな場合は教えて下さい。</p>
+            <div id="symbols">
+                <span>一般的に使用されているグルテンフリーの表示：</span>
+                <img class="symbol" src="assets/img6.png" />
+                <img class="symbol" src="assets/img7.png" />
+                <img class="symbol" src="assets/img8.png" />
+            </div>
+        </div>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img5.png" />
+        <p class="section-text"><b>グルテンの量が少量でもアレルギー症状</b> をおこし、危険です。汚染を避けるため、グ ルテンが含まれた食品を扱った調理器具・台所用品、水や油等を使用しないで下さい。</p>
+    </div>
+    <div class="section thanks">
+        <p class="section-text"><b>ご理解やご協力いただきありがとうございます。</b></p>
+    </div>
+</div>
+
+<div class="box">
+    <div class="section section-question">
+        <span class="section-number">1</span>
+        <div class="question section-border">
+            <p class="question-original">I can eat this.</p>
+            <p class="question-translated">食べられます。</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">2</span>
+        <div class="question section-border">
+            <p class="question-original">I can’t eat this.</p>
+            <p class="question-translated">食べられません。</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">3</span>
+        <div class="question section-border">
+            <p class="question-original">I am not sure.</p>
+            <p class="question-translated">食べられるかどうかよく分かりません。</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">4</span>
+        <div class="question section-border">
+            <p class="question-original">Does this food or sauce contain wheat flour?</p>
+            <p class="question-translated">この食品やこのソースに小麦粉が含まれていますか？</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">5</span>
+        <div class="question section-border">
+            <p class="question-original">What kind of grain is this food made from?</p>
+            <p class="question-translated">この食品はどの粉類で作られていますか？</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">6</span>
+        <div class="question section-border">
+            <p class="question-original">Is this meal safe?</p>
+            <p class="question-translated">この料理なら私 は安心して食べられますか？</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">7</span>
+        <div class="question section-border">
+            <p class="question-original">Can you help me choose a dish from the menu?</p>
+            <p class="question-translated">メニューから料理を選ぶ際に、私が安心して食べられる料理についてアドバイスをお願いします。</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">8</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add wheat flour.</p>
+            <p class="question-translated">小麦粉を入れないで下さい。</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">9</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add soy sauce.</p>
+            <p class="question-translated">醤油を入れないで下さい。</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">10</span>
+        <div class="question section-border">
+            <p class="question-original">Rice flour, cornflour, or potato starch are OK to use.</p>
+            <p class="question-translated">米粉・とうもろこし粉・ポテトスターチ等は使用できます。</p>
+        </div>
+    </div>
+</div>
+      </body>
+      </html>
+    `,
+      grk: `
+      <html>
+      <head>
+        <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #translator {
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 10px;
+      margin-right: 10px;
+    }
+    #translated-text {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #333;
+    }
+    .card {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 20px;
+      max-width: 700px;
+      font-size: 1em;
+      background-color: #f9f9f9;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .print-button {
+      margin-top: 10px;
+      display: block;
+      padding: 8px 15px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+    .print-button:hover {
+      background-color: #0056b3;
+    }
+    @media print {
+      body * {
+        visibility: visible;
+      }
+      .card, .card * {
+        visibility: visible;
+      }
+      .card {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        box-shadow: none;
+      }
+      .print-button {
+        display: none;
+      }
+    }
+
+    @font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Compact Rounded;
+  src: url(fonts/SF-Compact-Rounded-Semibold.ttf) format(truetype);
+  font-weight: bold;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Regular.ttf) format(truetype);
+  font-weight: normal;
+}
+@font-face {
+  font-family: SF Pro Text;
+  src: url(fonts/SFProText-Light.ttf) format(truetype);
+  font-weight: light;
+}
+.highlight {
+  font-weight: bold;
+  font-family: SF Compact Rounded;
+}
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+p {
+  margin: 0mm;
+}
+
+#main {
+  font-family: SF Pro Text;
+  font-weight: light;
+  color: #333;
+}
+
+table#main {
+  border-collapse: collapse;
+  margin: 25mm 19.1mm 0mm;
+}
+
+#main td {
+  border: 0.2mm dotted #333;
+  padding: 0;
+  width: 85.6mm;
+  max-width: 85.6mm;
+  height: 53.98mm;
+  max-height: 53.98mm;
+  overflow: auto;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  box-sizing: border-box;
+  height: inherit;
+  padding: 1mm;
+}
+
+.box-title {
+  align-items: center;
+  justify-content: center;
+}
+
+.box-notes {
+  justify-content: space-between;
+}
+
+.section {
+  display: flex;
+}
+
+.section-border {
+  border-bottom: 0.2mm #DDD dotted;
+}
+
+.section-icon {
+  max-height: 5mm;
+  min-width: 5mm;
+  padding: 1mm 1mm;
+}
+
+.section-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #333;
+  color: white;
+  font-weight: bold;
+  border-radius: 3mm;
+  max-height: 3mm;
+  min-width: 3mm;
+  padding: 1mm;
+  margin-left: 1mm;
+}
+
+.section-text {
+  padding: 1mm 1mm;
+  text-align: justify;
+}
+
+.section-question {
+  align-items: center;
+}
+
+.lang {
+  background-color: #0072BB;
+  color: white;
+  width: 80%;
+  font-weight: bold;
+  margin: 2mm;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+#section-symbols {
+  display: flex;
+  flex-direction: column;
+}
+
+#symbols {
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1mm;
+}
+
+.symbol {
+  width: 0.4cm;
+  height: 0.4cm;
+  margin-left: 1mm;
+}
+
+.thanks {
+  justify-content: center;
+}
+
+.question {
+  width: 100%;
+  margin-left: 2mm;
+  padding-bottom: 1mm;
+}
+
+.question-original {
+  font-size: 80%;
+}
+
+.question &gt .question-original,
+.question &gt .question-translated {
+  text-align: left;
+}
+
+.addNotes {
+  text-decoration: underline;
+  margin-top: 3mm;
+  margin-left: 2mm;
+}
+
+.footer {
+  display: flex;
+  height: 0.8cm;
+  padding: 1mm 0mm;
+  margin: 0 1mm;
+  align-items: center;
+  justify-content: start;
+  border-top: 1.2mm #333 solid;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  display: flex;
+  flex-direction: column;
+  margin-left: 1mm;
+  flex-grow: 1;
+  height: inherit;
+  justify-content: center;
+}
+
+.translated {
+  margin-top: 1mm;
+}
+
+#qr-code {
+  height: inherit;
+}
+
+body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 50px;
+}
+
+@media only screen and (max-width: 767px) {
+  body {
+    padding: 0 10px;
+    margin: 0;
+  }
+}
+div#main {
+  align-items: normal;
+}
+
+.lang {
+  font-size: 2em;
+}
+
+a {
+  text-decoration: underline;
+}
+
+.menubar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.menubar a {
+  min-width: 300px;
+  text-align: center;
+}
+
+.box {
+  padding: 10px;
+}
+
+.section {
+  padding: 5px;
+}
+
+.section-question {
+  margin: 5px 0px;
+}
+
+.section-border {
+  border-bottom: 1px #DDD dotted;
+}
+
+.section-icon {
+  max-height: 50px;
+  min-width: 50px;
+  padding: 10px;
+}
+
+.section-number {
+  border-radius: 30px;
+  max-height: 30px;
+  min-width: 30px;
+  margin: 5px;
+  margin-left: 20px;
+  padding: 5px;
+}
+
+.section-text {
+  padding: 10px;
+}
+
+.lang {
+  width: 100%;
+  margin: 5px;
+}
+
+#symbols {
+  margin: 10px auto;
+}
+
+.symbol {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+}
+
+.question {
+  margin: 5px 15px;
+  padding-bottom: 5px;
+}
+
+.section-number {
+  padding: 15px;
+  width: 12px;
+  min-width: auto;
+  height: 12px;
+}
+
+.footer {
+  padding: 5px 0px;
+  margin: 0px 2px;
+  height: 55px;
+  border-top: 10px #333 solid;
+  justify-content: center;
+}
+
+.logo {
+  height: inherit;
+}
+
+.copyright {
+  margin-left: 10px;
+  flex-grow: 0;
+  height: inherit;
+}
+
+.translated {
+  height: 50%;
+}
+        </style>
+      </head>
+      <body>
+ <div class="box">
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img1.png" />
+        <p class="section-text">Έχω μια ασθένεια που ονομάζεται <b> κοιλιοκάκη </b> και πρέπει οπωσδήποτε να αποφεύγω τα τρόφιμα που περιέχουν <b>γλουτένη</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img2.png" />
+        <p class="section-text"><b>Δεν μπορώ να καταναλώσω σιτηρά</b> (συμπεριλαμβανομένου του σκληρού σίτου και της όλυρας) καθώς και τρόφιμα που παρασκευάζονται από αυτά, όπως σιμιγδάλι, κους-κους, μπουλγκούρ και ψωμί, τριμμένη φρυγανιά, ζυμαρικά και νούγιες αυγών. Δεν μπορώ να φάω παναρισμένο κρέας καθώς και σούπες ή σάλτσες που περιέχουν <b>αλεύρι σίτου</b>. Δεν μπορώ επίσης να καταναλώσω τρόφιμα που περιέχουν <b>σίκαλη</b>, <b>κριθάρι</b> (συμπεριλαμβανομένης της μπύρας) και <b>βρώμη</b>.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img3.png" />
+        <p class="section-text">Τα τρόφιμα που <b>μπορώ να φάω</b>είναι: <b>ρύζι</b>, <b>καλαμπόκι</b>, κεχρί, φαγόπυρο, ταπιόκα και πατάτες (συμπεριλαμβανομένου του πατατάλευρου), φασόλια, μπιζέλια, κρέας, ψάρι, αυγά, γαλακτοκομικά προϊόντα, λαχανικά, φρούτα, καρύδια και σπόρους εφόσον δεν έχουν μολυνθεί με τα συστατικά που αναφέρονται παραπάνω.</p>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img4.png" />
+        <div>
+            <p class="section-text">Συχνά τα <b>επεξεργασμένα τρόφιμα</b> όπως η <b>σάλτσα σόγιας</b>, το κέτσαπ, η μουστάρδα, τα μπαχαρικά, οι κύβοι λαχανικών και κρέατος ή το επεξεργασμένο κρέας περιέχουν επίσης γλουτένη - <b>παρακαλούμε να μην τα χρησιμοποιείτε</b>. TΜπορούν να χρησιμοποιηθούν μόνο εάν χαρακτηρίζονται ως <b>μη περιέχοντα γλουτένη</b>. Σε περίπτωση αμφιβολιών, παρακαλώ ρωτήστε με.</p>
+            <div id="symbols">
+                <span>Συχνά χρησιμοποιούμενα σύμβολα έλλειψης γλουτένης</span>
+                <img class="symbol" src="assets/img6.png" />
+                <img class="symbol" src="assets/img7.png" />
+                <img class="symbol" src="assets/img8.png" />
+            </div>
+        </div>
+    </div>
+    <div class="section section-border">
+        <img class="section-icon" src="assets/img5.png" />
+        <p class="section-text">Ακόμη και η <b>μικρότερη ποσότητα γλουτένης</b> θα με κάνει <b>να αρρωστήσω πολύ</b>, έτσι λοιπόν, για να αποφευχθεί η μόλυνση, παρακαλώ μην χρησιμοποιείτε μαγειρικά σκεύη, νερό ή λάδι, τα οποία έχουν έρθει σε επαφή με προϊόντα που δεν μπορώ να φάω.</p>
+    </div>
+    <div class="section thanks">
+        <p class="section-text"><b>Σας ευχαριστώ πολύ για την βοήθεια και την κατανόησή σας.</b></p>
+    </div>
+</div>
+
+<div class="box">
+    <div class="section section-question">
+        <span class="section-number">1</span>
+        <div class="question section-border">
+            <p class="question-original">I can eat this.</p>
+            <p class="question-translated">Μπορώ να το φάω.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">2</span>
+        <div class="question section-border">
+            <p class="question-original">I can’t eat this.</p>
+            <p class="question-translated">Δεν μπορώ να το φάω.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">3</span>
+        <div class="question section-border">
+            <p class="question-original">I am not sure.</p>
+            <p class="question-translated">Δεν είμαι σίγουρος/η.</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">4</span>
+        <div class="question section-border">
+            <p class="question-original">Does this food or sauce contain wheat flour?</p>
+            <p class="question-translated">Στο φαγητό αυτό ή στην σάλτσα περιέχεται αλεύρι σιτηρών;</p>
+        </div>
+    </div>
+                    <div class="section section-question">
+        <span class="section-number">5</span>
+        <div class="question section-border">
+            <p class="question-original">What kind of grain is this food made from?</p>
+            <p class="question-translated">Από τι σιτάρι είναι φτιαγμμενο αυτό το φαγητό;</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">6</span>
+        <div class="question section-border">
+            <p class="question-original">Is this meal safe?</p>
+            <p class="question-translated">Αυτό το γεύμα είναι ασφαλές;</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">7</span>
+        <div class="question section-border">
+            <p class="question-original">Can you help me choose a dish from the menu?</p>
+            <p class="question-translated">Μπορείτε να με βοηθήσετε στην επιλογή ενός πιάτου από το μενού;</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">8</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add wheat flour.</p>
+            <p class="question-translated">Παρακαλώ μην προσθέσετε αλεύρι από σιτάρι.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">9</span>
+        <div class="question section-border">
+            <p class="question-original">Please do not add soy sauce.</p>
+            <p class="question-translated">Παρακαλώ μην προσθέσετε σάλτσα σόγιας.</p>
+        </div>
+    </div>
+    <div class="section section-question">
+        <span class="section-number">10</span>
+        <div class="question section-border">
+            <p class="question-original">Rice flour, cornflour, or potato starch are OK to use.</p>
+            <p class="question-translated">Μπορεί να γίνει χρήση ρυζάλευρου, καλαμποκάλευρου ή άμυλο πατάτας.</p>
+        </div>
+    </div>
+</div>
+      </body>
+      </html>
+    `,
+    };
+
+function translateText() {
+      const language = document.getElementById("language").value;
+      const translatedText = translations[language] || "Translation not available.";
+
+      // Create a printable card
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <button class="print-button" onclick="printCard(this)">Print</button>
+        <p>${translatedText}</p>
+      `;
+
+      // Display the card in the translated-text section
+      const translatedTextDiv = document.getElementById("translated-text");
+      translatedTextDiv.innerHTML = ""; // Clear previous content
+      translatedTextDiv.appendChild(card);
+      }
+
+function printCard(button) {
+      const card = button.parentElement;
+      const originalContent = document.body.innerHTML;
+  
+      // Isolate card content for printing
+      document.body.innerHTML = card.outerHTML;
+      window.print();
+
+      // Restore original page content
+      document.body.innerHTML = originalContent;
+      location.reload(); // Reload page to reattach JavaScript
+    }
+  </script>
+</body>
+</html>
