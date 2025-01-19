@@ -3,16 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coeliac-Safe Travel Translator</title>
+  <title>Coeliac Safe Travel Translator</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
  <style>
-@import url(https://fonts.googleapis.com/css?family=Barlow:wght@100;500;700;900&display=swap);
+@import url("https://fonts.googleapis.com/css?family=Barlow:wght@100;500;700;900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Unbounded:wght@500;900&display=swap");
 
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
       justify-content: center;
-      background: linear-gradient(to right, #a2eba4, #58a364);
+     background: linear-gradient(to right, #a2eba4, #58a364);
     }
     #translator {
       margin-top: 20px;
@@ -86,11 +88,11 @@
       }
     }
 
-    @font-face {
+@font-face {
   font-family: SF Compact Rounded;
   src: url(fonts/SF-Compact-Rounded-Regular.ttf) format(truetype);
   font-weight: normal;
-}
+} 
 @font-face {
   font-family: SF Compact Rounded;
   src: url(fonts/SF-Compact-Rounded-Semibold.ttf) format(truetype);
@@ -421,6 +423,7 @@ a {
   <div id="translated-text"></div>
 
   <script>
+
     const translations = {
       en:  `
       <html>
@@ -3888,7 +3891,7 @@ function translateText() {
       const translatedTextDiv = document.getElementById("translated-text");
       translatedTextDiv.innerHTML = ""; // Clear previous content
       translatedTextDiv.appendChild(card);
-      }
+      };
 
 function printCard(button) {
       const card = button.parentElement;
@@ -3901,7 +3904,7 @@ function printCard(button) {
       // Restore original page content
       document.body.innerHTML = originalContent;
       location.reload(); // Reload page to reattach JavaScript
-    }
+    };
   </script>
 </body>
 </html>
